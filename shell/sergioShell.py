@@ -21,10 +21,10 @@ def my_shell():
         os.write(1, ("Parent: Child %d terminated with exit code %d\n" %childPidCode).encode())
 
 def main() :
-    print("Welcome to Sergio Shell! Type in your command or -1 to exit")
+    print("Welcome to Sergio Shell! Type in your command or 'exit' to terminate")
     user_command = input("$ ")
 
-    while(user_command != "-1"):
+    while(user_command != "exit"):
         my_shell()
         user_command = input("$ ")
 
