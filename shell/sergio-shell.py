@@ -8,11 +8,6 @@ def intro():
     print("                        ( (                    ")
     print("                         `-'                   ")
     print("                                               ")
-    print("                                               ")
-    print("                                               ")
-    print("                                               ")
-    print("                                               ")
-    print("                                               ")
     print("                    .   ,- To the Moon Sergio !")
     print("                   .'.                         ")
     print("                   |o|                         ")
@@ -41,6 +36,7 @@ def intro():
     print("     `.          888PP'    ,'                  ")
     print("       `-.      d8P'    ,-'   -CJ-             ")
     print("          `-.,,_'__,,.-'                       ")
+    print("                                               ")
 
 def shell(arg1, arg2):
     output_redirect = False
