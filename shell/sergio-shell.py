@@ -3,6 +3,13 @@
 import os, sys, time, re
 
 def shell(arg1, arg2):
+    output_redirect = False
+    output_file = "";
+    
+    print("Would you like to redirect output?")
+    if input("yes /no ").lower() == "yes":
+        output_redirect = True
+        output_file = input("What file would you like to redirect to? ")
 
     pid = os.getpid()
 
@@ -14,28 +21,32 @@ def shell(arg1, arg2):
         os.write(2, ("fork failed, returning %d\n" % rc).encode())
         sys.exit(1)
         
-    elif rc == 0:                   # child
-        os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" % 
-                     (os.getpid(), pid)).encode())
+    elif rc == 0:
+        os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" %  (os.getpid(), pid)).encode())
         args = [arg1, arg2]
-        for dir in re.split(":", os.environ['PATH']): # try each directory in the path
+
+        if output_redirect:
+            os.close(1)
+            os.open(output_file, os.O_CREAT | os.O_WRONLY);
+            os.set_inheritable(1, True)
+        
+        for dir in re.split(":", os.environ['PATH']):
+            
             program = "%s/%s" % (dir, args[0])
             os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
             try:
-                os.execve(program, args, os.environ) # try to exec program
-            except FileNotFoundError:             # ...expected
-                pass                              # ...fail quietly
+                os.execve(program, args, os.environ)
+                
+            except FileNotFoundError: 
+                pass 
 
         os.write(2, ("Child:    Could not exec %s\n" % args[0]).encode())
-        sys.exit(1)                 # terminate with error
+        sys.exit(1)
 
-    else:                           # parent (forked ok)
-        os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" % 
-                     (pid, rc)).encode())
+    else:
+        os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" %  (pid, rc)).encode())
         childPidCode = os.wait()
-        os.write(1, ("Parent: Child %d terminated with exit code %d\n" % 
-                     childPidCode).encode())
-
+        os.write(1, ("Parent: Child %d terminated with exit code %d\n" %  childPidCode).encode())
 
 def main():
     print("Welcome to Sergio Shell! Enter your command or 'exit' to terminate")
