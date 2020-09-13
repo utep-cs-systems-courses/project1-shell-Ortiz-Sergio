@@ -43,6 +43,11 @@ def main():
 
     while (user_command.lower() != "exit"):
         user_args = user_command.split()
+        if len(user_args) < 2:
+            print("Please enter at least two arguments")
+            user_command = input("$ ")
+            continue
+        
         shell(user_args[0], user_args[1])
         user_command = input("$ ")
 
