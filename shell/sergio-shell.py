@@ -2,25 +2,35 @@
 
 import os, sys, time, re
 
-def mario_intro():
-    
-    print("____▒▒▒▒▒")
-    print("—-▒▒▒▒▒▒▒▒▒")
-    print("—–▓▓▓░░▓░")
-    print("—▓░▓░░░▓░░░")
-    print("—▓░▓▓░░░▓░░░")
-    print("—▓▓░░░░▓▓▓▓")
-    print("——░░░░░░░░")
-    print("—-▓▓▒▓▓▓▒▓▓")
-    print("–▓▓▓▒▓▓▓▒▓▓▓")
-    print("▓▓▓▓▒▒▒▒▒▓▓▓▓")
-    print("░░▓▒░▒▒▒░▒▓░░")
-    print("░░░▒▒▒▒▒▒▒░░░")
-    print("░░▒▒▒▒▒▒▒▒▒░░")
-    print("—-▒▒▒ ——▒▒▒")
-    print("–▓▓▓———-▓▓▓")
-    print("▓▓▓▓———-▓▓▓▓")
-    print(" ")
+def zelda_intro():
+    print("              _______")
+    print("         ..-'`       ````---.")
+    print("       .'          ___ .'````.'SS'.")
+    print("      /        ..-SS####'.  /SSHH##'.")
+    print("     |       .'SSSHHHH##|/#/#HH#H####'.")
+    print("    /      .'SSHHHHH####/||#/: \SHH#####\")
+    print("   /      /SSHHHHH#####/!||;`___|SSHH###\")
+    print("-..__    /SSSHHH######.         \SSSHH###\")
+    print("`.'-.''--._SHHH#####.'           '.SH####/")
+    print("  '. ``'-  '/SH####`/_             `|H##/")
+    print("  | '.     /SSHH###|`'==.       .=='/\H|")
+    print("  |   `'-.|SHHHH##/\__\/        /\//|~|/")
+    print("  |    |S#|/HHH##/             |``  |")
+    print("  |    \H' |H#.'`              \    |")
+    print("  |        ''`|               -     /")
+    print("  |          /H\          .----    /")
+    print("  |         |H#/'.           `    /")
+    print("  |          \| | '..            /")
+    print("  |    ^~DLF   /|    ''..______.'")
+    print("   \          //\__    _..-. | ")
+    print("    \         ||   ````     \ |_")
+    print("     \    _.-|               \| |_")
+    print("     _\_.-'   `'''''-.        |   `--.")
+    print(" ''``    \            `''-;    \ /")
+    print("          \      .-'|     ````.' -")
+    print("          |    .'  `--'''''-.. |/")
+    print("          |  .'               \|")
+    print("          |.'")
 
 def shell(arg1, arg2):
     output_redirect = False
@@ -69,7 +79,7 @@ def shell(arg1, arg2):
         os.write(1, ("Parent: Child %d terminated with exit code %d\n" %  childPidCode).encode())
 
 def main():
-    mario_intro()
+    zelda_intro()
     print("Welcome to Sergio Shell! Enter your command or 'exit' to terminate")
     user_command = input("$ ")
 
