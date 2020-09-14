@@ -38,14 +38,13 @@ def intro():
     print("          `-.,,_'__,,.-'                       ")
     print("                                               ")
 
-def shell(arg1, arg2):
+def shell(user_args):
     output_redirect = False
     output_file = "";
-    
-    print("Would you like to redirect output?")
-    if input("yes /no ").lower() == "yes":
+
+    if user_args.count(">") > 0:
         output_redirect = True
-        output_file = input("What file would you like to redirect to? ")
+        output_file = user_args[user_args.index(">") + 1] 
 
     pid = os.getpid()
 
@@ -59,7 +58,7 @@ def shell(arg1, arg2):
         
     elif rc == 0:
         os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" %  (os.getpid(), pid)).encode())
-        args = [arg1, arg2]
+        args = [user_args[0], user_args[1]]
 
         if output_redirect:
             os.close(1)
@@ -96,7 +95,7 @@ def main():
             user_command = input("$ ")
             continue
         
-        shell(user_args[0], user_args[1])
+        shell(user_args)
         user_command = input("$ ")
 
     print("Thank you for using my shell!")
