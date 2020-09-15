@@ -54,12 +54,10 @@ def shell(args):
         output_redirect = True
         output_file = args[args.index(">") + 1]
 
-    #This doesn't work yet
     if args.count("<") > 0:
         print("input redirect")
         input_redirect = True
         input_file = args[args.index("<") - 1]
-        print("input file is "+input_file)
 
     pid = os.getpid()
     
@@ -76,11 +74,28 @@ def shell(args):
             os.open(output_file, os.O_CREAT | os.O_WRONLY);
             os.set_inheritable(1, True)
 
-        #This doesn't work yet
         if input_redirect:
             os.close(0)
-            os.open(input_file, os.O_CREAT | os.O_WRONLY);
+            fdIn = os.open(input_file, os.O_RDONLY);
             os.set_inheritable(0, True)
+
+            args.remove(input_file)
+            args.remove("<")
+
+            list_counter = 0
+            
+            input = os.read(fdIn, 10000)
+            if len(input) == 0:
+                print("empty input file")
+                return
+
+            lines = re.split(b"\n", input)
+            for line in lines:
+                strToPrint = f"{line.decode()}\n"
+                new_args = strToPrint.split()
+                for arg in new_args:
+                    args.insert(list_counter, arg)
+                    list_counter += 1
         
         for dir in re.split(":", os.environ['PATH']):
             
