@@ -53,9 +53,10 @@ def shell(args):
     if args.count(">") > 0:
         output_redirect = True
         output_file = args[args.index(">") + 1]
+        args.remove(">")
+        args.remove(output_file)
 
     if args.count("<") > 0:
-        print("input redirect")
         input_redirect = True
         input_file = args[args.index("<") - 1]
 
