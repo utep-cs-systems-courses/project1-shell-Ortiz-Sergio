@@ -2,6 +2,11 @@
 
 import os, sys, time, re
 
+def get_user_command():
+    if os.environ.get("$PS1") != None:
+        return input(os.environ["$PS1"])
+    return input("$ ")
+
 def intro():
     print("Art by Christian 'CeeJay' Jensen")
     print("                         .-.                   ")
@@ -38,17 +43,25 @@ def intro():
     print("          `-.,,_'__,,.-'                       ")
     print("                                               ")
 
-def shell(user_args):
+def shell(args):
     output_redirect = False
-    output_file = "";
+    output_file = ""
 
-    if user_args.count(">") > 0:
+    input_redirect = False
+    input_file = ""
+
+    if args.count(">") > 0:
         output_redirect = True
-        output_file = user_args[user_args.index(">") + 1] 
+        output_file = args[args.index(">") + 1]
+
+    #This doesn't work yet
+    if args.count("<") > 0:
+        print("input redirect")
+        input_redirect = True
+        input_file = args[args.index("<") - 1]
+        print("input file is "+input_file)
 
     pid = os.getpid()
-
-    os.write(1, ("About to fork (pid:%d)\n" % pid).encode())
     
     rc = os.fork()
     
@@ -57,46 +70,61 @@ def shell(user_args):
         sys.exit(1)
         
     elif rc == 0:
-        os.write(1, ("Child: My pid==%d.  Parent's pid=%d\n" %  (os.getpid(), pid)).encode())
-        args = [user_args[0], user_args[1]]
 
         if output_redirect:
             os.close(1)
             os.open(output_file, os.O_CREAT | os.O_WRONLY);
             os.set_inheritable(1, True)
+
+        #This doesn't work yet
+        if input_redirect:
+            os.close(0)
+            os.open(input_file, os.O_CREAT | os.O_WRONLY);
+            os.set_inheritable(0, True)
         
         for dir in re.split(":", os.environ['PATH']):
             
             program = "%s/%s" % (dir, args[0])
-            os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
+    
             try:
                 os.execve(program, args, os.environ)
                 
             except FileNotFoundError: 
                 pass 
 
-        os.write(2, ("Child:    Could not exec %s\n" % args[0]).encode())
+        print(args[0]+": command not found")
         sys.exit(1)
 
     else:
-        os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" %  (pid, rc)).encode())
+        #os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" %  (pid, rc)).encode())
         childPidCode = os.wait()
-        os.write(1, ("Parent: Child %d terminated with exit code %d\n" %  childPidCode).encode())
+        #os.write(1, ("Parent: Child %d terminated with exit code %d\n" %  childPidCode).encode())
 
 def main():
     intro()
     print("Welcome to Sergio Shell! Enter your command or 'exit' to terminate")
-    user_command = input("$ ")
+    
+    user_command = get_user_command()
 
     while (user_command.lower() != "exit"):
         user_args = user_command.split()
-        if len(user_args) < 2:
-            print("Please enter at least two arguments")
-            user_command = input("$ ")
+        
+        if user_args.count('cd') > 0:
+            new_dir = user_args[user_args.index("cd") + 1]
+            
+            try:
+                os.chdir(new_dir)
+                os.write(1, (os.getcwd()+" \n").encode())
+            except FileNotFoundError:
+                os.write(1, (new_dir+" not found\n").encode())
+
+            user_command = get_user_command()
             continue
         
+    
         shell(user_args)
-        user_command = input("$ ")
+
+        user_command = get_user_command()
 
     print("Thank you for using my shell!")
 
