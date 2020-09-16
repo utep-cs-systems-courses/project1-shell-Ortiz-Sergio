@@ -2,6 +2,18 @@
 
 import os, sys, time, re
 
+def execute(args):
+    for dir in re.split(":", os.environ['PATH']):
+        program = "%s/%s" % (dir, args[0])
+
+        try:
+            os.execve(program, args, os.environ)
+        except FileNotFoundError:
+            pass
+
+    os.write(2, (f"{args[0]}: command not found.").encode())
+    sys.exit(1)
+
 def get_user_command():
     if os.environ.get("$PS1") != None:
         return input(os.environ["$PS1"])
@@ -45,10 +57,7 @@ def intro():
 
 def shell(args):
     output_redirect = False
-    output_file = ""
-
     input_redirect = False
-    input_file = ""
 
     if args.count(">") > 0:
         output_redirect = True
@@ -59,6 +68,9 @@ def shell(args):
     if args.count("<") > 0:
         input_redirect = True
         input_file = args[args.index("<") - 1]
+
+    if '&' in args:
+        args.remove('&')        
 
     pid = os.getpid()
     
@@ -97,19 +109,42 @@ def shell(args):
                 for arg in new_args:
                     args.insert(list_counter, arg)
                     list_counter += 1
-        
-        for dir in re.split(":", os.environ['PATH']):
-            
-            program = "%s/%s" % (dir, args[0])
-    
-            try:
-                os.execve(program, args, os.environ)
-                
-            except FileNotFoundError: 
-                pass 
 
-        print(args[0]+": command not found")
-        sys.exit(1)
+        if "|" in args:
+            args = ' '.join([str(elem) for elem in args])
+            pipe = args.split("|")
+            pipe1 = pipe[0].split()
+            pipe2 = pipe[1].split()
+
+            pr, pw = os.pipe()
+            for f in (pr, pw):
+                os.set_inheritable(f, True)
+
+            pipeFork = os.fork()
+            
+            if pipeFork < 0:
+                os.write(2, ("fork failed").encode())
+                sys.exit(1)
+
+            elif pipeFork == 0:
+                os.close(1)
+                os.dup(pw)
+                os.set_inheritable(1, True)
+                for fd in (pr, pw):
+                    os.close(fd)
+                execute(pipe1)
+
+            else:
+                os.close(0)
+                os.dup(pr)
+                os.set_inheritable(0, True)
+                for fd in (pw, pr):
+                    os.close(fd)
+                execute(pipe2)
+
+            return
+        
+        execute(args)
 
     else:
         #os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" %  (pid, rc)).encode())
@@ -137,7 +172,6 @@ def main():
             user_command = get_user_command()
             continue
         
-    
         shell(user_args)
 
         user_command = get_user_command()
