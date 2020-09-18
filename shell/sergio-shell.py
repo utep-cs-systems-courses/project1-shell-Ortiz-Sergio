@@ -11,49 +11,22 @@ def execute(args):
         except FileNotFoundError:
             pass
 
-    os.write(2, (f"{args[0]}: command not found.").encode())
     sys.exit(1)
 
 def get_user_command():
-    if os.environ.get("$PS1") != None:
-        return input(os.environ["$PS1"])
-    return input("$ ")
-
-def intro():
-    print("Art by Christian 'CeeJay' Jensen")
-    print("                         .-.                   ")
-    print("                        ( (                    ")
-    print("                         `-'                   ")
-    print("                                               ")
-    print("                    .   ,- To the Moon Sergio !")
-    print("                   .'.                         ")
-    print("                   |o|                         ")
-    print("                  .'o'.                        ")
-    print("                  |.-.|                        ")
-    print("                  '   '                        ")
-    print("                   ( )                         ")
-    print("                    )                          ")
-    print("                   ( )                         ")
-    print("                                               ")
-    print("               ____                            ")
-    print("          .-'""p 8o""`-.                       ")
-    print("       .-'8888P'Y.`Y[ ' `-.                    ")
-    print("     ,']88888b.J8oo_      '`.                  ")
-    print("   ,' ,88888888888[\"        Y`.                ")
-    print("  /   8888888888P            Y8\               ")
-    print(" /    Y8888888P'             ]88\              ")
-    print(":     `Y88'   P              `888:             ")
-    print(":       Y8.oP '- >            Y88:             ")
-    print("|          `Yb  __             `'|             ")
-    print(":            `'d8888bo.          :             ")
-    print(":             d88888888ooo.      ;             ")
-    print(" \            Y88888888888P     /              ")
-    print("  \            `Y88888888P     /               ")
-    print("   `.            d88888P'    ,'                ")
-    print("     `.          888PP'    ,'                  ")
-    print("       `-.      d8P'    ,-'   -CJ-             ")
-    print("          `-.,,_'__,,.-'                       ")
-    print("                                               ")
+    if 'PS1' in os.environ:
+        os.write(1, (os.environ['PS1']).encode())
+        try:
+            args = [str(n) for n in input().split()]
+        except EOFError:
+            sys.exit()
+    else:
+        try:
+            args = [str(n) for n in input().split()]
+        except EOFError:
+            sys.exit(1)
+    return args
+            
 
 def shell(args):
     output_redirect = False
@@ -77,7 +50,6 @@ def shell(args):
     rc = os.fork()
     
     if rc < 0:
-        os.write(2, ("fork failed, returning %d\n" % rc).encode())
         sys.exit(1)
         
     elif rc == 0:
@@ -99,7 +71,6 @@ def shell(args):
             
             input = os.read(fdIn, 10000)
             if len(input) == 0:
-                print("empty input file")
                 return
 
             lines = re.split(b"\n", input)
@@ -123,7 +94,6 @@ def shell(args):
             pipeFork = os.fork()
             
             if pipeFork < 0:
-                os.write(2, ("fork failed").encode())
                 sys.exit(1)
 
             elif pipeFork == 0:
@@ -147,36 +117,25 @@ def shell(args):
         execute(args)
 
     else:
-        #os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" %  (pid, rc)).encode())
         childPidCode = os.wait()
-        #os.write(1, ("Parent: Child %d terminated with exit code %d\n" %  childPidCode).encode())
 
 def main():
-    intro()
-    print("Welcome to Sergio Shell! Enter your command or 'exit' to terminate")
-    
-    user_command = get_user_command()
+    user_args = get_user_command()
 
-    while (user_command.lower() != "exit"):
-        user_args = user_command.split()
+    while not('exit' in user_args):
         
         if user_args.count('cd') > 0:
-            new_dir = user_args[user_args.index("cd") + 1]
-            
             try:
-                os.chdir(new_dir)
-                os.write(1, (os.getcwd()+" \n").encode())
+                os.chdir(user_args[1])
             except FileNotFoundError:
-                os.write(1, (new_dir+" not found\n").encode())
+                pass
 
-            user_command = get_user_command()
+            user_args = get_user_command()
             continue
         
         shell(user_args)
 
-        user_command = get_user_command()
-
-    print("Thank you for using my shell!")
+        user_args = get_user_command()
 
 if __name__ == "__main__":
     main()
